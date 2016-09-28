@@ -1,0 +1,11 @@
+{
+    \"Name\" : \"ArmMcu\",
+    \"Version\" : \"0.0.1\",
+    \"CompatVersion\" : \"0.0.1\",
+    \"Vendor\" : \"snikeguo\",
+    \"Copyright\" : \"snikeguo\",
+    \"License\" : \"you must give me $1\",
+    \"Description\" : \"a arm mcu plugin for qtCreator\",
+    \"Url\" : \"snikeguo@foxmail.com,Chinese QQ 408260925\",
+    $$dependencyList
+}

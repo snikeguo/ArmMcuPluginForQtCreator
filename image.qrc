@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>image/arrow_left_double_32px_539534_easyicon.net.png</file>
+        <file>image/arrow_right_double_32px_539538_easyicon.net.png</file>
+        <file>image/add_database_to_32px_6035_easyicon.net.png</file>
+    </qresource>
+</RCC>
