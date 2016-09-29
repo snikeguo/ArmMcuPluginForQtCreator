@@ -1,11 +1,13 @@
 DEFINES += ARMMCU_LIBRARY
 QT +=core xml
-# ArmMcu files
 
+# ArmMcu files
+#INCLUDEPATH +=F:/QTPROJECT/stm32plugin/Stm32PluginProject/arm_mcu_plugin/
 SOURCES += armmcuplugin.cpp \
     importprojectdialog.cpp \
     projectoptiondialog.cpp \
-    debuggerviewdialog.cpp
+    debuggerviewdialog.cpp \
+    mylistwidget.cpp
 
 HEADERS += armmcuplugin.h \
         armmcu_global.h \
@@ -13,7 +15,8 @@ HEADERS += armmcuplugin.h \
     importprojectdialog.h \
     projectoptiondialog.h \
     debuggerviewdialog.h \
-    projectconfigstruct.h
+    projectconfigstruct.h \
+    mylistwidget.h
 
 # Qt Creator linking
 ## set the QTC_SOURCE environment variable to override the setting here
@@ -56,7 +59,7 @@ QTC_PLUGIN_RECOMMENDS += \
 ###### End _dependencies.pri contents ######
 
 include($$QTCREATOR_SOURCES/src/qtcreatorplugin.pri)
-
+DEFINES -= QT_NO_CAST_FROM_ASCII
 FORMS += \
     importprojectdialog.ui \
     projectoptiondialog.ui \

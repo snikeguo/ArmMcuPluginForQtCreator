@@ -6,6 +6,7 @@ namespace ArmMcu {
 struct ProjectConfig
 {
     QString ProjectFilePath;//qbs or keil project file path
+    QString OutPutPath;
     QString TargetName;//ProjectName
     QString Device; //device name .eg:stm32F103C8T6,
     QString Vendor;

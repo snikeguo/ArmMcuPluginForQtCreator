@@ -3,6 +3,7 @@
 #include<QFileDialog>
 #include<QDir>
 #include<QMessageBox>
+#include"mylistwidget.h"
 #ifdef Q_OS_WIN
     #if _MSC_VER >= 1600
     #pragma execution_character_set("utf-8")
@@ -68,7 +69,6 @@ ProjectOptionDialog::ProjectOptionDialog(QWidget *parent) :
         <<tr("Use Nano C Library");
     ui->LinkCLibComboBox->addItems(items);
 }
-
 ProjectOptionDialog::~ProjectOptionDialog()
 {
     delete ui;
@@ -138,7 +138,7 @@ void ProjectOptionDialog::onProjectConfigChanged(ProjectConfig &config)
     qDebug()<<hex<<config.IRAM[0].StartAddr;
 
 
-    QFileInfo fi(pc.ProjectFilePath);
+   /* QFileInfo fi(pc.ProjectFilePath);
     QDir dt(fi.path());
     dt.cdUp();
     dt.mkdir(tr("ArmMcuForQtCreator"));
@@ -154,7 +154,7 @@ void ProjectOptionDialog::onProjectConfigChanged(ProjectConfig &config)
     qbsReadme.open(QIODevice::WriteOnly);
     QByteArray a("qbs文件为QTCreator的工程文件，请不要修改！！");
     qbsReadme.write(a.constData());
-    qbsReadme.close();
+    qbsReadme.close();*/
 
 }
 
@@ -419,6 +419,35 @@ void ArmMcu::ProjectOptionDialog::on_ApplyPushButton_clicked()
         b+=pc.LinkerFlags.at(i)+tr("  ");
     }
     ui->ShowLinkStringTextEdit->setText(b);
+    if(ui->MapFileCheckBox->checkState()==Qt::Checked)
+    {
+        pc.IsCreateMapFile=true;
+    }
+    else
+    {
+        pc.IsCreateMapFile=false;
+    }
+    if(ui->HexFileCheckBox->checkState()==Qt::Checked)
+        pc.IsCreateHexFile=true;
+    else
+        pc.IsCreateHexFile=false;
+    if(ui->BinFileCheckBox->checkState()==Qt::Checked)
+        pc.IsCreateBinFile=true;
+    else
+        pc.IsCreateBinFile=false;
+    if(ui->AsmFileCheckBox->checkState()==Qt::Checked)
+        pc.IsCreateAsmFile=true;
+    else
+        pc.IsCreateAsmFile=false;
+    QDir ch(ui->OutPutPathLineEdit->text());
+    if(ch.exists()==false)
+    {
+        QMessageBox::warning(this,tr("Output path is not path!"),tr("error"));
+        return;
+    }
+    pc.OutPutPath=ui->OutPutPathLineEdit->text();
+    pc.TargetName=ui->OutPutProductNameLineEdit->text()==tr("")?pc.Device:ui->OutPutProductNameLineEdit->text();
+
 }
 
 void ArmMcu::ProjectOptionDialog::on_LdBrowersPushButton_clicked()
@@ -439,4 +468,181 @@ void ArmMcu::ProjectOptionDialog::on_LdAddPushButton_clicked()
     }
     ui->LdListWidget->addItem(fs);
     pc.LinkScript=fs;
+}
+
+
+void ArmMcu::ProjectOptionDialog::on_OkPushButton_clicked()
+{
+    this->on_ApplyPushButton_clicked();
+    WriteQbsFile();
+    this->hide();
+}
+void ArmMcu::ProjectOptionDialog::WriteQbsFile()
+{
+    QFileInfo mdk(pc.ProjectFilePath);
+    QDir srcP=mdk.absoluteDir();
+    srcP.cdUp();
+    QDir qbsPath(srcP.path()+tr("/ArmMcuForQtCreator"));
+    if(qbsPath.exists()==false)
+    {
+        //create qbs path
+        srcP.mkdir(tr("ArmMcuForQtCreator"));
+    }
+    QFile prjqbs;
+    prjqbs.setFileName(qbsPath.path()+tr("/prj.qbs"));
+    if(prjqbs.exists()==true)
+        prjqbs.remove();//delete
+    prjqbs.open(QIODevice::WriteOnly);
+
+    QFile ProjectTemplate(qbsPath.path()+tr("/ProjectTemplate.qbs"));
+    ProjectTemplate.open(QIODevice::ReadOnly);
+    QByteArray pt=ProjectTemplate.readAll();
+    ProjectTemplate.close();
+    QString ptstring(pt);
+
+    QString res=pc.TargetName;
+    ptstring=ptstring.replace(tr("##__ProjectName__##"),res);
+
+    res=pc.IsCreateAsmFile==true?tr("true"):tr("false");
+    ptstring=ptstring.replace(tr("##__IsCreateAsmFile__##"),res);
+
+    res=pc.IsCreateBinFile==true?tr("true"):tr("false");
+    ptstring=ptstring.replace(tr("##__IsCreateBinFile__##"),res);
+
+    res=pc.IsCreateHexFile==true?tr("true"):tr("false");
+    ptstring=ptstring.replace(tr("##__IsCreateHexFile__##"),res);
+
+    res=pc.IsCreateMapFile==true?tr("true"):tr("false");
+    ptstring=ptstring.replace(tr("##__IsCreateMapFile__##"),res);
+
+    res.clear();
+    res+="[";
+    for(int i=0;i<pc.Defines.count();i++)
+    {
+        res+="\"";
+        res+=pc.Defines.at(i);
+        res+="\",";
+    }
+    res+="]";
+    ptstring=ptstring.replace(tr("##__Defines__##"),res);
+
+    res.clear();
+    res+="[";
+    for(int i=0;i<pc.IncludePath.count();i++)
+    {
+        res+="\"";
+        res+=pc.IncludePath.at(i);
+        res+="\",";
+    }
+    res+="]";
+    ptstring=ptstring.replace(tr("##__IncludePaths__##"),res);
+
+
+    res.clear();
+    res+="[";
+    for(int i=0;i<pc.CxxFlag.count();i++)
+    {
+        res+="\"";
+        res+=pc.CxxFlag.at(i);
+        res+="\",";
+    }
+    res+="]";
+    ptstring=ptstring.replace(tr("##__CxxFlag__##"),res);
+
+
+    res.clear();
+    res+="[";
+    for(int i=0;i<pc.CFlag.count();i++)
+    {
+        res+="\"";
+        res+=pc.CFlag.at(i);
+        res+="\",";
+    }
+    res+="]";
+    ptstring=ptstring.replace(tr("##__CFlag__##"),res);
+    ptstring=ptstring.replace(tr("##__WarningLevel__##"),"\"all\"");
+
+    res.clear();
+    res+="[";
+    res+="\"";
+    res+=pc.LinkScript;
+    res+="\",";
+    res+="]";
+    ptstring=ptstring.replace(tr("##__LinkerScript__##"),res);
+
+
+    res.clear();
+    res+="[";
+    for(int i=0;i<pc.CommonCompilerFlags.count();i++)
+    {
+        res+="\"";
+        res+=pc.CommonCompilerFlags.at(i);
+        res+="\",";
+    }
+    res.clear();
+    for(int i=0;i<pc.Fpu.count();i++)
+    {
+        res+="\"";
+        res+=pc.Fpu.at(i);
+        res+="\",";
+    }
+    res+="]";
+    ptstring=ptstring.replace(tr("##__CommonCompilerFlags__##"),res);
+
+    res.clear();
+    res+="[";
+    for(int i=0;i<pc.LinkerFlags.count();i++)
+    {
+        res+="\"";
+        res+=pc.LinkerFlags.at(i);
+        res+="\",";
+    }
+    res+="]";
+    ptstring=ptstring.replace(tr("##__LinkerFlags__##"),res);
+
+
+    ptstring=ptstring.replace(tr("##__OutputFilePath__##"),tr("\"")
+                              +pc.OutPutPath+tr("\""));
+    res.clear();
+
+
+
+/*    Qbscontent.append("\
+import qbs\r\n\
+import ArmMcuProduct\r\n\
+{   \
+ArmMcuProduct\r\n\
+    {type:\r\n\
+        var args=[\"application\",\"size\"];\r\n\
+        if(IsCreateAsmFile==true)\r\n\
+            args.push(\"disassmbly\")\r\n \
+        if(IsCreateBinFile==true)\r\n\
+            args.push(\"bin\")\r\n\
+        if(IsCreateHexFile==true)\r\n\
+            args.push(\"hex\")\r\n\
+        return args;\r\n\
+    }\r\n");
+    QString d=(tr("OutputFilePath:\"")+pc.OutPutPath+tr("\"\r\n"));
+    Qbscontent.append(d.toStdString().data());
+    QString res=pc.IsCreateAsmFile==true?tr("true"):tr("false");
+    d=tr("IsCreateAsmFile:")+res+tr("\r\n");
+    Qbscontent.append(d.toStdString().data());
+
+    res=pc.IsCreateMapFile==true?tr("true"):tr("false");
+    d=tr("IsCreateMapFile:")+res+tr("\r\n");
+    Qbscontent.append(d.toStdString().data());
+
+    res=pc.IsCreateBinFile==true?tr("true"):tr("false");
+    d=tr("IsCreateBinFile:")+res+tr("\r\n");
+    Qbscontent.append(d.toStdString().data());
+
+    res=pc.IsCreateHexFile==true?tr("true"):tr("false");
+    d=tr("IsCreateHexFile:")+res+tr("\r\n");
+    Qbscontent.append(d.toStdString().data());*/
+
+
+
+    prjqbs.write(ptstring.toStdString().data());
+    prjqbs.close();
+
 }
