@@ -16,7 +16,7 @@
 #include <QMenu>
 #include <QtPlugin>
 #include<QtXml/QDomDocument>
-
+#include<QDir>
 #ifdef Q_OS_WIN
     #if _MSC_VER >= 1600
     #pragma execution_character_set("utf-8")
@@ -34,6 +34,16 @@ ArmMcuPlugin::ArmMcuPlugin()
     connect(this,SIGNAL(ProjectConfigChange(ProjectConfig&)),proSetDlg,SLOT(onProjectConfigChanged(ProjectConfig&)));
     //proSetDlg->setEnabled(false);
     //debugview->setEnabled(false);
+    QDir bin(Core::ICore::libexecPath());
+    bin.cdUp();//lib bin path
+    bin.cd("lib");
+    bin.cd("qtcreator");
+    bin.cd("plugins");
+    bin.cd("ARMMCU");
+    ThisPluginProjectPath=bin.path();
+    proSetDlg->SetThisPluginProjectPath(ThisPluginProjectPath);
+    ipjd->SetThisPluginProjectPath(ThisPluginProjectPath);
+
 }
 
 ArmMcuPlugin::~ArmMcuPlugin()
@@ -53,6 +63,7 @@ bool ArmMcuPlugin::initialize(const QStringList &arguments, QString *errorString
 
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)
+
 
     QAction *action = new QAction(tr("import CubeMx Project"), this);
     Core::Command *cmd = Core::ActionManager::registerAction(action, Constants::IMPORT_PRJ_ACTION_ID,

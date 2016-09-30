@@ -37,6 +37,7 @@ private:
     ProjectOptionDialog *proSetDlg;
     DebuggerViewDialog *debugview;
     ProjectConfig m_ProjectConfig;
+    QString ThisPluginProjectPath;
 signals:
     void ProjectConfigChange(ProjectConfig &p);
 };

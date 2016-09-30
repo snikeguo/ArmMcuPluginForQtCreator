@@ -1,4 +1,4 @@
-#ifndef PROJECTCONFIGSTRUCT_H
+﻿#ifndef PROJECTCONFIGSTRUCT_H
 #define PROJECTCONFIGSTRUCT_H
 #include<QHash>
 #include<QString>
@@ -35,7 +35,7 @@ struct ProjectConfig
     //bool WarningLevel=true;
     QStringList CommonCompilerFlags;
     QStringList LinkerFlags;
-    QString Fpu;
+    QStringList Fpu;
 };
 }
 #endif // PROJECTCONFIGSTRUCT_H

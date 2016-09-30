@@ -29,6 +29,10 @@ public:
             return c;
         }
     }
+    inline void SetThisPluginProjectPath(QString d)
+    {
+        ThisPluginProjectPath=d;
+    }
 private slots:
     void on_browersPushButton_clicked();
 
@@ -40,6 +44,7 @@ private slots:
 
 private:
     Ui::ImportProjectDialog *ui;
+    QString ThisPluginProjectPath;
     ProjectConfig config;
     void ProductQbsFile(QString filepath);
     void ProductKeilFile(QString filepath);

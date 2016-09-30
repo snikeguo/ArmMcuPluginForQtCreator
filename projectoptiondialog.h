@@ -17,6 +17,10 @@ class ProjectOptionDialog : public QDialog
 public:
     explicit ProjectOptionDialog(QWidget *parent = 0);
     ~ProjectOptionDialog();
+    inline void SetThisPluginProjectPath(QString d)
+    {
+        ThisPluginProjectPath=d;
+    }
 
 private slots:
     void on_ComIncludeBrowersPushButton_clicked();
@@ -34,10 +38,13 @@ private slots:
 
     void on_OkPushButton_clicked();
 
+    void on_OutPutPathBrowersPushButton_clicked();
+
 private:
     Ui::ProjectOptionDialog *ui;
     ProjectConfig pc;
-    QString CompileAndLinkShareFieldString;
+    QStringList CompileAndLinkShareFieldString;
+    QString ThisPluginProjectPath;
     void WriteQbsFile();
 public slots:
     void onProjectConfigChanged(ProjectConfig &config);

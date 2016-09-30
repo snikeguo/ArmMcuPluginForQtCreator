@@ -160,102 +160,135 @@ void ProjectOptionDialog::onProjectConfigChanged(ProjectConfig &config)
 
 void ArmMcu::ProjectOptionDialog::on_ApplyPushButton_clicked()
 {
+    QDir ch(ui->OutPutPathLineEdit->text());
+    if(ch.exists()==false)
+    {
+        QMessageBox::warning(this,tr("Output path is not path!"),tr("error"));
+        return;
+    }
+    pc.OutPutPath=ui->OutPutPathLineEdit->text();
+    pc.TargetName=ui->OutPutProductNameLineEdit->text()==tr("")?pc.Device:ui->OutPutProductNameLineEdit->text();
+
     //!!complier base
     int i=0;
     //ARM IP
     pc.CommonCompilerFlags.clear();
-
+    pc.Fpu.clear();
+    pc.CommonCompilerFlags.append("-mthumb");
     if(pc.CpuType==tr("\"Cortex-M0\""))
     {
-        pc.CommonCompilerFlags.append(CompileAndLinkShareFieldString=tr("-mthumb -mcpu=cortex-m0"));
+        pc.CommonCompilerFlags.append(tr("-mcpu=cortex-m0"));
     }
     else if(pc.CpuType==tr("\"Cortex-M0+\""))
     {
-        pc.CommonCompilerFlags.append(CompileAndLinkShareFieldString=tr("-mthumb -mcpu=cortex-m0plus"));
+        pc.CommonCompilerFlags.append(tr("-mcpu=cortex-m0plus"));
     }
     else if(pc.CpuType==tr("\"Cortex-M1\""))
     {
-        pc.CommonCompilerFlags.append(CompileAndLinkShareFieldString=tr("-mthumb -mcpu=cortex-m1"));
+        pc.CommonCompilerFlags.append(tr("-mcpu=cortex-m1"));
     }
     else if(pc.CpuType==tr("\"Cortex-M3\""))
     {
-        pc.CommonCompilerFlags.append(CompileAndLinkShareFieldString=tr("-mthumb -mcpu=cortex-m3"));
+        pc.CommonCompilerFlags.append(tr("-mcpu=cortex-m3"));
     }
     else if(pc.CpuType==tr("\"Cortex-M4\""))
     {
-        pc.CommonCompilerFlags.append(CompileAndLinkShareFieldString=tr("-mthumb -mcpu=cortex-m4"));
+        pc.CommonCompilerFlags.append(tr("-mcpu=cortex-m4"));
         //FPU
         i=ui->FPUComboBox->currentIndex();
         if(i==0)
         {
-            pc.Fpu=tr("");
-            CompileAndLinkShareFieldString+=tr(" ");
-            CompileAndLinkShareFieldString+=pc.Fpu;
+            //pc.Fpu=tr("");
+            //CompileAndLinkShareFieldString+=tr(" ");
+            //CompileAndLinkShareFieldString.;
         }
         else if(i==1)
         {
-            pc.Fpu=tr("-mfloat-abi=softfp -mfpu=fpv4-sp-d16");
-            CompileAndLinkShareFieldString+=tr(" ");
-            CompileAndLinkShareFieldString+=pc.Fpu;
+            //pc.Fpu=tr("-mfloat-abi=softfp -mfpu=fpv4-sp-d16");
+            pc.Fpu.append("-mfloat-abi=softfp");
+            pc.Fpu.append("-mfpu=fpv4-sp-d16");
+            //CompileAndLinkShareFieldString+=tr(" ");
+            //CompileAndLinkShareFieldString+=pc.Fpu;
         }
         else if(i==2)
         {
-            pc.Fpu=tr("-mfloat-abi=hard -mfpu=fpv4-sp-d16");
-            CompileAndLinkShareFieldString+=tr(" ");
-            CompileAndLinkShareFieldString+=pc.Fpu;
+            //pc.Fpu=tr("-mfloat-abi=hard -mfpu=fpv4-sp-d16");
+            pc.Fpu.append("-mfloat-abi=hard");
+            pc.Fpu.append("-mfpu=fpv4-sp-d16");
+            //CompileAndLinkShareFieldString+=tr(" ");
+            //CompileAndLinkShareFieldString+=pc.Fpu;
         }
     }
     else if(pc.CpuType==tr("\"Cortex-M7\""))
     {
-        pc.CommonCompilerFlags.append(CompileAndLinkShareFieldString=tr("-mthumb -mcpu=cortex-m7"));
+        pc.CommonCompilerFlags.append(tr("-mthumb -mcpu=cortex-m7"));
         i=ui->FPUComboBox->currentIndex();
         if(i==0)
         {
-            pc.Fpu=tr("");
-            CompileAndLinkShareFieldString+=tr(" ");
-            CompileAndLinkShareFieldString+=pc.Fpu;
+            //pc.Fpu=tr("");
+            //CompileAndLinkShareFieldString+=tr(" ");
+            //CompileAndLinkShareFieldString+=pc.Fpu;
         }
         else if(i==1)
         {
-            pc.Fpu=tr("-mfloat-abi=softfp -mfpu=fpv4-sp-d16");
-            CompileAndLinkShareFieldString+=tr(" ");
-            CompileAndLinkShareFieldString+=pc.Fpu;
+            pc.Fpu.append("-mfloat-abi=softfp");
+            pc.Fpu.append("-mfpu=fpv4-sp-d16");
+            //CompileAndLinkShareFieldString+=tr(" ");
+            //CompileAndLinkShareFieldString+=pc.Fpu;
         }
         else if(i==2)
         {
-            pc.Fpu=tr("-mfloat-abi=hard -mfpu=fpv4-sp-d16");
-            CompileAndLinkShareFieldString+=tr(" ");
-            CompileAndLinkShareFieldString+=pc.Fpu;
+            pc.Fpu.append("-mfloat-abi=hard");
+            pc.Fpu.append("-mfpu=fpv4-sp-d16");
+            //CompileAndLinkShareFieldString+=tr(" ");
+            //CompileAndLinkShareFieldString+=pc.Fpu;
         }
+    }
+    CompileAndLinkShareFieldString.clear();
+    for(i=0;i<pc.CommonCompilerFlags.count();i++)
+    {
+        CompileAndLinkShareFieldString.append(pc.CommonCompilerFlags.at(i));
+    }
+    for(i=0;i<pc.Fpu.count();i++)
+    {
+        CompileAndLinkShareFieldString.append(pc.Fpu.at(i));
     }
     i=ui->OptimizationComboBox->currentIndex();
     if(i==0)
     {
         pc.Optimization=tr("-O0");
+        pc.CommonCompilerFlags.append(tr("-O0"));
+
     }
     else if(i==1)
     {
         pc.Optimization=tr("-O1");
+        pc.CommonCompilerFlags.append(tr("-O1"));
     }
     else if(i==2)
     {
         pc.Optimization=tr("-O2");
+        pc.CommonCompilerFlags.append(tr("-O2"));
     }
     else if(i==3)
     {
         pc.Optimization=tr("-O3");
+        pc.CommonCompilerFlags.append(tr("-O3"));
     }
     else if(i==4)
     {
         pc.Optimization=tr("-Os");
+        pc.CommonCompilerFlags.append(tr("-Os"));
     }
     else if(i==5)
     {
         pc.Optimization=tr("-Ofast");
+        pc.CommonCompilerFlags.append(tr("-Ofast"));
     }
     else if(i==6)
     {
         pc.Optimization=tr("-Og");
+        pc.CommonCompilerFlags.append(tr("-Og"));
     }
     //debug
     i=ui->DebugComboBox->currentIndex();
@@ -335,15 +368,15 @@ void ArmMcu::ProjectOptionDialog::on_ApplyPushButton_clicked()
     i=ui->CStandardComboBox->currentIndex();
     if(i==0)
     {
-        pc.CFlag.append(tr("-std=C90"));
+        pc.CFlag.append(tr("-std=c90"));
     }
     else if(i==1)
     {
-        pc.CFlag.append(tr("-std=C99"));
+        pc.CFlag.append(tr("-std=c99"));
     }
     else if(i==2)
     {
-        pc.CFlag.append(tr("-std=C11"));
+        pc.CFlag.append(tr("-std=c11"));
     }
     else if(i==3)
     {
@@ -362,7 +395,7 @@ void ArmMcu::ProjectOptionDialog::on_ApplyPushButton_clicked()
     i=ui->CppStandardComboBox->currentIndex();
     if(i==0)
     {
-        pc.CxxFlag.append(tr("-std=C++98"));
+        pc.CxxFlag.append(tr("-std=c++98"));
     }
     else if(i==1)
     {
@@ -382,7 +415,12 @@ void ArmMcu::ProjectOptionDialog::on_ApplyPushButton_clicked()
         b+=pc.CommonCompilerFlags.at(i)+tr(" ");
     }
     b+=pc.Optimization+tr(" ");
-    b+=pc.Fpu+tr(" ");
+    for(i=0;i<pc.Fpu.count();i++)
+    {
+       b+=pc.Fpu.at(i);
+       b+=" ";
+    }
+
     for(i=0;i<pc.CFlag.count();i++)
     {
         b+=pc.CFlag.at(i)+tr(" ");
@@ -396,7 +434,8 @@ void ArmMcu::ProjectOptionDialog::on_ApplyPushButton_clicked()
     //!linker
     //-Wl,--gc-sections
     pc.LinkerFlags.clear();
-    pc.LinkerFlags.append(CompileAndLinkShareFieldString);
+    for(i=0;i<CompileAndLinkShareFieldString.count();i++)
+    pc.LinkerFlags.append(CompileAndLinkShareFieldString.at(i));
     if(ui->GcSectionsCheckBox->checkState()==Qt::Checked)
     {
         pc.LinkerFlags.append(tr("-Wl,--gc-sections"));
@@ -409,7 +448,11 @@ void ArmMcu::ProjectOptionDialog::on_ApplyPushButton_clicked()
     {
         pc.LinkerFlags.append(tr("-flto"));
     }
-    if(ui->LinkCLibComboBox->currentIndex()==1)
+    if(ui->LinkCLibComboBox->currentIndex()==0)
+    {
+        pc.LinkerFlags.append(tr("-specs=nosys.specs"));
+    }
+    else  if(ui->LinkCLibComboBox->currentIndex()==1)
     {
         pc.LinkerFlags.append(tr("-specs=nano.specs"));
     }
@@ -422,6 +465,7 @@ void ArmMcu::ProjectOptionDialog::on_ApplyPushButton_clicked()
     if(ui->MapFileCheckBox->checkState()==Qt::Checked)
     {
         pc.IsCreateMapFile=true;
+        pc.LinkerFlags.append("-Wl,-Map="+pc.OutPutPath+"/"+pc.TargetName+".map");
     }
     else
     {
@@ -439,14 +483,8 @@ void ArmMcu::ProjectOptionDialog::on_ApplyPushButton_clicked()
         pc.IsCreateAsmFile=true;
     else
         pc.IsCreateAsmFile=false;
-    QDir ch(ui->OutPutPathLineEdit->text());
-    if(ch.exists()==false)
-    {
-        QMessageBox::warning(this,tr("Output path is not path!"),tr("error"));
-        return;
-    }
-    pc.OutPutPath=ui->OutPutPathLineEdit->text();
-    pc.TargetName=ui->OutPutProductNameLineEdit->text()==tr("")?pc.Device:ui->OutPutProductNameLineEdit->text();
+
+
 
 }
 
@@ -477,6 +515,40 @@ void ArmMcu::ProjectOptionDialog::on_OkPushButton_clicked()
     WriteQbsFile();
     this->hide();
 }
+bool copyDirectoryFiles(const QString &fromDir, const QString &toDir, bool coverFileIfExist)
+{
+    QDir sourceDir(fromDir);
+    QDir targetDir(toDir);
+    if(!targetDir.exists()){    /**< 如果目标目录不存在，则进行创建 */
+        if(!targetDir.mkdir(targetDir.absolutePath()))
+            return false;
+    }
+
+    QFileInfoList fileInfoList = sourceDir.entryInfoList();
+    foreach(QFileInfo fileInfo, fileInfoList){
+        if(fileInfo.fileName() == "." || fileInfo.fileName() == "..")
+            continue;
+
+        if(fileInfo.isDir()){    /**< 当为目录时，递归的进行copy */
+            if(!copyDirectoryFiles(fileInfo.filePath(),
+                targetDir.filePath(fileInfo.fileName()),
+                coverFileIfExist))
+                return false;
+        }
+        else{            /**< 当允许覆盖操作时，将旧文件进行删除操作 */
+            if(coverFileIfExist && targetDir.exists(fileInfo.fileName())){
+                targetDir.remove(fileInfo.fileName());
+            }
+
+            /// 进行文件copy
+            if(!QFile::copy(fileInfo.filePath(),
+                targetDir.filePath(fileInfo.fileName()))){
+                    return false;
+            }
+        }
+    }
+    return true;
+}
 void ArmMcu::ProjectOptionDialog::WriteQbsFile()
 {
     QFileInfo mdk(pc.ProjectFilePath);
@@ -486,22 +558,28 @@ void ArmMcu::ProjectOptionDialog::WriteQbsFile()
     if(qbsPath.exists()==false)
     {
         //create qbs path
-        srcP.mkdir(tr("ArmMcuForQtCreator"));
+        //srcP.mkdir(tr("ArmMcuForQtCreator"));
+        ::copyDirectoryFiles(ThisPluginProjectPath+"/ArmMcuForQtCreator",qbsPath.path(),true);
     }
+    QFileInfo openQbs(srcP.path()+"/"+pc.TargetName+".qbs");
+    if(openQbs.exists()==false)
+        QFile::copy(ThisPluginProjectPath+"/open.qbs",srcP.path()+"/"+pc.TargetName+".qbs");
+
+
     QFile prjqbs;
     prjqbs.setFileName(qbsPath.path()+tr("/prj.qbs"));
     if(prjqbs.exists()==true)
         prjqbs.remove();//delete
     prjqbs.open(QIODevice::WriteOnly);
 
-    QFile ProjectTemplate(qbsPath.path()+tr("/ProjectTemplate.qbs"));
+    QFile ProjectTemplate(ThisPluginProjectPath+tr("/ProjectTemplate.qbs"));
     ProjectTemplate.open(QIODevice::ReadOnly);
     QByteArray pt=ProjectTemplate.readAll();
     ProjectTemplate.close();
     QString ptstring(pt);
 
     QString res=pc.TargetName;
-    ptstring=ptstring.replace(tr("##__ProjectName__##"),res);
+    ptstring=ptstring.replace(tr("##__ProjectName__##"),"\""+res+"\"");
 
     res=pc.IsCreateAsmFile==true?tr("true"):tr("false");
     ptstring=ptstring.replace(tr("##__IsCreateAsmFile__##"),res);
@@ -579,7 +657,7 @@ void ArmMcu::ProjectOptionDialog::WriteQbsFile()
         res+=pc.CommonCompilerFlags.at(i);
         res+="\",";
     }
-    res.clear();
+    //res.clear();
     for(int i=0;i<pc.Fpu.count();i++)
     {
         res+="\"";
@@ -605,44 +683,14 @@ void ArmMcu::ProjectOptionDialog::WriteQbsFile()
                               +pc.OutPutPath+tr("\""));
     res.clear();
 
-
-
-/*    Qbscontent.append("\
-import qbs\r\n\
-import ArmMcuProduct\r\n\
-{   \
-ArmMcuProduct\r\n\
-    {type:\r\n\
-        var args=[\"application\",\"size\"];\r\n\
-        if(IsCreateAsmFile==true)\r\n\
-            args.push(\"disassmbly\")\r\n \
-        if(IsCreateBinFile==true)\r\n\
-            args.push(\"bin\")\r\n\
-        if(IsCreateHexFile==true)\r\n\
-            args.push(\"hex\")\r\n\
-        return args;\r\n\
-    }\r\n");
-    QString d=(tr("OutputFilePath:\"")+pc.OutPutPath+tr("\"\r\n"));
-    Qbscontent.append(d.toStdString().data());
-    QString res=pc.IsCreateAsmFile==true?tr("true"):tr("false");
-    d=tr("IsCreateAsmFile:")+res+tr("\r\n");
-    Qbscontent.append(d.toStdString().data());
-
-    res=pc.IsCreateMapFile==true?tr("true"):tr("false");
-    d=tr("IsCreateMapFile:")+res+tr("\r\n");
-    Qbscontent.append(d.toStdString().data());
-
-    res=pc.IsCreateBinFile==true?tr("true"):tr("false");
-    d=tr("IsCreateBinFile:")+res+tr("\r\n");
-    Qbscontent.append(d.toStdString().data());
-
-    res=pc.IsCreateHexFile==true?tr("true"):tr("false");
-    d=tr("IsCreateHexFile:")+res+tr("\r\n");
-    Qbscontent.append(d.toStdString().data());*/
-
-
-
     prjqbs.write(ptstring.toStdString().data());
     prjqbs.close();
 
+
+}
+
+void ArmMcu::ProjectOptionDialog::on_OutPutPathBrowersPushButton_clicked()
+{
+    QString fn=QFileDialog::getExistingDirectory(this,tr("打开路径"),tr(""),QFileDialog::ShowDirsOnly);
+    ui->OutPutPathLineEdit->setText(fn);
 }
